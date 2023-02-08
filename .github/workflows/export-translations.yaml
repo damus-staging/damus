@@ -3,14 +3,14 @@ name: Sync Fork, Export Translations
 on:
   workflow_dispatch:  # Run manually 
   schedule:
-  - cron: "0 * * * *" # Run every hour
+  - cron: "0 */4 * * *" # Run every 4 hours
 
 jobs:
-
-  sync_latest_from_upstream:
-    name: Sync latest commits from upstream master
+  sync_latest:
+    name: Sync damus-io/damus
     runs-on: ubuntu-latest
-
+    outputs:
+      has_new_commits: ${{ steps.sync.outputs.has_new_commits }}
     steps:
     - name: Checkout target repo
       uses: actions/checkout@v2
@@ -27,13 +27,14 @@ jobs:
         upstream_sync_repo: damus-io/damus
     - name: New commits found
       if: steps.sync.outputs.has_new_commits == 'true'
-      run: echo "New commits found to sync."
+      run: echo "Found new commits"
     - name: No new commits
       if: steps.sync.outputs.has_new_commits == 'false'
       run: echo "There were no new commits"
 
   check_for_translations:
     name: Check for translation updates
+    needs: sync_latest
     runs-on: macos-12
     strategy:
       matrix:
@@ -44,6 +45,7 @@ jobs:
       with:
         ref: translations
         token: ${{ secrets.PAT }}
+      if: needs.sync_latest.outputs.has_new_commits
     - uses: technote-space/get-diff-action@v6
       with:
         FILES: |
