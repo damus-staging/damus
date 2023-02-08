@@ -1,0 +1,59 @@
+name: Sync Fork, Export Translations 
+
+on:
+  workflow_dispatch:  # Run manually 
+  schedule:
+  - cron: "0 * * * *" # Run every hour
+
+jobs:
+
+  sync_latest_from_upstream:
+    name: Sync latest commits from upstream master
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout target repo
+      uses: actions/checkout@v2
+      with:
+        ref: master
+        token: ${{ secrets.PAT }}
+    - name: Sync upstream changes
+      id: sync
+      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+      with:
+        target_sync_branch: master
+        target_repo_token: ${{ secrets.PAT }}
+        upstream_sync_branch: master
+        upstream_sync_repo: damus-io/damus
+    - name: New commits found
+      if: steps.sync.outputs.has_new_commits == 'true'
+      run: echo "New commits found to sync."
+    - name: No new commits
+      if: steps.sync.outputs.has_new_commits == 'false'
+      run: echo "There were no new commits"
+
+  check_for_translations:
+    name: Check for translation updates
+    runs-on: macos-12
+    strategy:
+      matrix:
+        include:
+          - xcode: "14.2" 
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: translations
+        token: ${{ secrets.PAT }}
+    - uses: technote-space/get-diff-action@v6
+      with:
+        FILES: |
+          translations/**.*
+    - name: Run export script
+      run: |
+        sh devtools/export-source-translation.sh
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Update Translations 🤖
+        branch: translations
+        create_branch: true
+      if: env.GIT_DIFF
