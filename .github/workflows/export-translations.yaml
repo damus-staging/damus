@@ -36,7 +36,7 @@ jobs:
     name: Check for translation updates
     needs: sync_latest
     runs-on: macos-12
-    if: needs.sync_latest.outputs.has_new_commits
+    if: needs.sync_latest.outputs.has_new_commits == 'true'
     strategy:
       matrix:
         include:
