@@ -36,6 +36,7 @@ jobs:
     name: Check for translation updates
     needs: sync_latest
     runs-on: macos-12
+    if: needs.sync_latest.outputs.has_new_commits
     strategy:
       matrix:
         include:
@@ -45,7 +46,6 @@ jobs:
       with:
         ref: translations
         token: ${{ secrets.PAT }}
-      if: needs.sync_latest.outputs.has_new_commits
     - uses: technote-space/get-diff-action@v6
       with:
         FILES: |
