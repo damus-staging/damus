@@ -25,6 +25,7 @@ jobs:
         target_repo_token: ${{ secrets.PAT }}
         upstream_sync_branch: master
         upstream_sync_repo: damus-io/damus
+        git_config_pull_rebase: true
     - name: New commits found
       if: steps.sync.outputs.has_new_commits == 'true'
       run: echo "Found new commits"
