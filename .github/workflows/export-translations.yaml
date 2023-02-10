@@ -59,4 +59,5 @@ jobs:
         commit_message: Update Translations 🤖
         branch: translations
         create_branch: true
+        push_options: '--force'
       if: env.GIT_DIFF
