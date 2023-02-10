@@ -23,6 +23,7 @@ jobs:
       with:
         target_sync_branch: master
         target_repo_token: ${{ secrets.PAT }}
+        target_branch_push_args: '--force'
         upstream_sync_branch: master
         upstream_sync_repo: damus-io/damus
         git_config_pull_rebase: true
